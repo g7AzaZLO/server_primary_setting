@@ -26,16 +26,15 @@ PACKAGES=(
   make
   gcc
   ncdu
-  tmux
   cmake
   clang
   pkg-config
   libssl-dev
   python3-pip
   protobuf-compiler
-  bc
   docker.io
   dos2unix
+  screen
 )
 
 for PACKAGE in "${PACKAGES[@]}"; do

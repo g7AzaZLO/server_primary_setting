@@ -37,13 +37,15 @@ sudo apt install -y \
   docker.io \
   dos2unix
 
-# Проверка успешности установки
-if [ $? -eq 0 ]; then
-  echo "Все пакеты успешно установлены"
-else
-  echo "Ошибка при установке пакетов"
-  exit 1
-fi
+for PACKAGE in "${PACKAGES[@]}"; do
+  echo "Установка $PACKAGE..."
+  sudo apt install -y "$PACKAGE"
+  if [ $? -eq 0 ]; then
+    echo "$PACKAGE успешно установлен."
+  else
+    echo "Ошибка при установке $PACKAGE. Пропускаем..."
+  fi
+done
 
 # Печать завершения процесса
 echo "Начальная настройка сервера завершена."

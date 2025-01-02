@@ -16,26 +16,27 @@ sudo apt update -y && sudo apt upgrade -y
 
 # Установка необходимых пакетов
 echo "Установка необходимых пакетов..."
-sudo apt install -y \
-  curl \
-  git \
-  jq \
-  lz4 \
-  build-essential \
-  unzip \
-  make \
-  gcc \
-  ncdu \
-  tmux \
-  cmake \
-  clang \
-  pkg-config \
-  libssl-dev \
-  python3-pip \
-  protobuf-compiler \
-  bc \
-  docker.io \
+PACKAGES=(
+  curl
+  git
+  jq
+  lz4
+  build-essential
+  unzip
+  make
+  gcc
+  ncdu
+  tmux
+  cmake
+  clang
+  pkg-config
+  libssl-dev
+  python3-pip
+  protobuf-compiler
+  bc
+  docker.io
   dos2unix
+)
 
 for PACKAGE in "${PACKAGES[@]}"; do
   echo "Установка $PACKAGE..."

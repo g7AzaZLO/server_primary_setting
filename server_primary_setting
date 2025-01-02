@@ -35,7 +35,6 @@ PACKAGES=(
   docker.io
   dos2unix
   screen
-  unzip 
 )
 
 for PACKAGE in "${PACKAGES[@]}"; do

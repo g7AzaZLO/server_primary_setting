@@ -76,7 +76,7 @@ for PACKAGE in "${PACKAGES[@]}"; do
 done
 
 # Удаление старых версий Docker
-remoove_old_docker
+remove_old_docker
 
 # Установка Docker и плагина Compose
 install_docker

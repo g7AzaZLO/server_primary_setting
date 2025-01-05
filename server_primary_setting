@@ -1,5 +1,34 @@
 #!/bin/bash
-# Обновление системы
+
+remove_old_docker() {
+  echo "Удаление старых версий Docker..."
+  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
+    sudo apt-get remove -y "$pkg"
+    if [ $? -eq 0 ]; then
+      echo "$pkg успешно удален."
+    else
+      echo "Ошибка при удалении $pkg. Пропускаем..."
+    fi
+  done
+}
+
+install_docker() {
+  echo "Установка Docker и плагина Compose..."
+  sudo apt-get update -y
+  sudo apt-get install -y ca-certificates curl
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update -y
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  if [ $? -eq 0 ]; then
+    echo "Docker и плагин Compose успешно установлены."
+  else
+    echo "Ошибка при установке Docker. Проверьте логи."
+  fi
+}
+
 echo -e "\033[1;36m"
 echo -e "████╗░██████╗░███████╗████╗  ░█████╗░███████╗░█████╗░███████╗██╗░░░░░░█████╗░"
 echo -e "██╔═╝██╔════╝░╚════██║╚═██║  ██╔══██╗╚════██║██╔══██╗╚════██║██║░░░░░██╔══██╗"
@@ -32,7 +61,6 @@ PACKAGES=(
   libssl-dev
   python3-pip
   protobuf-compiler
-  docker.io
   dos2unix
   screen
 )
@@ -46,6 +74,12 @@ for PACKAGE in "${PACKAGES[@]}"; do
     echo "Ошибка при установке $PACKAGE. Пропускаем..."
   fi
 done
+
+# Удаление старых версий Docker
+remoove_old_docker
+
+# Установка Docker и плагина Compose
+install_docker
 
 # Печать завершения процесса
 echo "Начальная настройка сервера завершена."

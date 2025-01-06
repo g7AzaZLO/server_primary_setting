@@ -46,5 +46,3 @@
 ---
 
 Автор: [g7AzaZLO](https://github.com/g7AzaZLO)  
-Лицензия: MIT
-```

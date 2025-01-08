@@ -13,7 +13,7 @@
 Для автоматической настройки сервера выполните следующую команду:
 
 ```bash
-. <(wget -qO- https://raw.githubusercontent.com/g7AzaZLO/server_primary_setting/refs/heads/main/server_primary_setting)
+. <(wget -qO- https://raw.githubusercontent.com/g7AzaZLO/server_primary_setting/refs/heads/main/server_primary_setting.sh)
 ```
 
 ## Что делает скрипт

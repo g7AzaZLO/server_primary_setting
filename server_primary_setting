@@ -1,29 +1,59 @@
 #!/bin/bash
 
 remove_old_docker() {
-  echo "Удаление старых версий Docker..."
-  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
-    sudo apt-get remove -y "$pkg"
-    if [ $? -eq 0 ]; then
-      echo "$pkg успешно удален."
-    else
-      echo "Ошибка при удалении $pkg. Пропускаем..."
+  echo "Удаление старых версий Docker и связанных компонентов..."
+  # Список пакетов для полного удаления
+  packages=(
+    docker
+    docker.io
+    docker-ce
+    docker-ce-cli
+    containerd
+    containerd.io
+    runc
+    docker-doc
+    docker-compose
+    docker-compose-v2
+    podman-docker
+  )
+
+  for pkg in "${packages[@]}"; do
+    if dpkg -l | grep -q "$pkg"; then
+      sudo apt-get remove --purge -y "$pkg"
+      if [ $? -eq 0 ]; then
+        echo "$pkg успешно удалён."
+      else
+        echo "Ошибка при удалении $pkg. Пропускаем..."
+      fi
     fi
   done
+
+  # Автоматическая очистка оставшихся зависимостей
+  sudo apt-get autoremove -y
 }
 
 install_docker() {
-  echo "Установка Docker и плагина Compose..."
+  echo "Установка Docker и плагинов..."
+  # Подготовка к добавлению официального репозитория Docker
   sudo apt-get update -y
-  sudo apt-get install -y ca-certificates curl
+  sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+  # Добавление ключа GPG Docker и репозитория
   sudo install -m 0755 -d /etc/apt/keyrings
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
   sudo chmod a+r /etc/apt/keyrings/docker.asc
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+https://download.docker.com/linux/ubuntu \
+$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  # Установка Docker CE, CLI, containerd и сопутствующих плагинов
   sudo apt-get update -y
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   if [ $? -eq 0 ]; then
-    echo "Docker и плагин Compose успешно установлены."
+    echo "Docker и плагины успешно установлены."
+    # Проверка статуса Docker
+    sudo systemctl status docker
+    docker version
   else
     echo "Ошибка при установке Docker. Проверьте логи."
   fi
@@ -75,11 +105,10 @@ for PACKAGE in "${PACKAGES[@]}"; do
   fi
 done
 
-# Удаление старых версий Docker
+# Удаление старых версий Docker (полное)
 remove_old_docker
 
-# Установка Docker и плагина Compose
+# Установка Docker из официального репозитория
 install_docker
 
-# Печать завершения процесса
 echo "Начальная настройка сервера завершена."

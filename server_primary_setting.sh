@@ -89,6 +89,8 @@ PACKAGES=(
   clang
   pkg-config
   libssl-dev
+  libzmq3-dev
+  libczmq-dev
   python3-pip
   protobuf-compiler
   dos2unix

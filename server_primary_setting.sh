@@ -52,8 +52,8 @@ $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev
   if [ $? -eq 0 ]; then
     echo "Docker и плагины успешно установлены."
     # Проверка статуса Docker
-    sudo systemctl status docker
-    docker version
+    sudo systemctl is-active --quiet docker && echo "Docker активен" || echo "Docker не активен"
+    docker version || echo "Ошибка: Docker не установлен или не работает"
   else
     echo "Ошибка при установке Docker. Проверьте логи."
   fi

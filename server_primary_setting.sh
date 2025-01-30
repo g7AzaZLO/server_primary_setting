@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Настройка needrestart для автоматического перезапуска служб
 configure_needrestart() {
   echo "Проверка наличия needrestart..."
   if dpkg -l | grep -q needrestart; then
@@ -12,6 +13,18 @@ configure_needrestart() {
     fi
   else
     echo "needrestart не установлен. Пропускаем настройку."
+  fi
+}
+
+# Отключение интерактивных запросов при установке пакетов
+disable_interactive_prompts() {
+  echo "Отключение интерактивных запросов..."
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y install needrestart
+  if [ $? -eq 0 ]; then
+    echo "Интерактивные запросы отключены."
+  else
+    echo "Ошибка при отключении интерактивных запросов. Пропускаем..."
   fi
 }
 
@@ -88,6 +101,10 @@ echo -e "\033[0m"
 echo "Обновление списка пакетов и установка обновлений..."
 sudo apt update -y && sudo apt upgrade -y
 
+# Отключение интерактивных запросов
+disable_interactive_prompts
+
+# Настройка needrestart
 configure_needrestart
 
 # Установка необходимых пакетов
@@ -131,3 +148,9 @@ remove_old_docker
 install_docker
 
 echo "Начальная настройка сервера завершена."
+
+# Проверка необходимости перезагрузки
+if [ -f /var/run/reboot-required ]; then
+  echo "Требуется перезагрузка для применения обновлений ядра."
+  echo "Выполните перезагрузку вручную: sudo reboot"
+fi

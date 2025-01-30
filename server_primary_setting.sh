@@ -1,5 +1,15 @@
 #!/bin/bash
 
+configure_needrestart() {
+  echo "Настройка needrestart для автоматического перезапуска служб..."
+  sudo sed -i "s/\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
+  if [ $? -eq 0 ]; then
+    echo "needrestart настроен на автоматический перезапуск служб."
+  else
+    echo "Ошибка при настройке needrestart. Пропускаем..."
+  fi
+}
+
 remove_old_docker() {
   echo "Удаление старых версий Docker и связанных компонентов..."
   # Список пакетов для полного удаления
@@ -72,6 +82,8 @@ echo -e "\033[1;32mTelegram community: \033[5;31mhttps://t.me/g7team_ru\033[0m"
 echo -e "\033[0m"
 echo "Обновление списка пакетов и установка обновлений..."
 sudo apt update -y && sudo apt upgrade -y
+
+configure_needrestart
 
 # Установка необходимых пакетов
 echo "Установка необходимых пакетов..."

@@ -1,33 +1,25 @@
 #!/bin/bash
 
-# Настройка needrestart для автоматического перезапуска служб
-configure_needrestart() {
-  echo "Проверка наличия needrestart..."
-  if dpkg -l | grep -q needrestart; then
-    echo "Настройка needrestart для автоматического перезапуска служб..."
-    sudo sed -i "s/\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
-    if [ $? -eq 0 ]; then
-      echo "needrestart настроен на автоматический перезапуск служб."
-    else
-      echo "Ошибка при настройке needrestart. Пропускаем..."
-    fi
-  else
-    echo "needrestart не установлен. Пропускаем настройку."
-  fi
-}
-
-# Отключение интерактивных запросов при установке пакетов
-disable_interactive_prompts() {
-  echo "Отключение интерактивных запросов..."
+configure_environment() {
+  echo "Настройка неинтерактивного режима..."
   export DEBIAN_FRONTEND=noninteractive
-  sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y install needrestart
-  if [ $? -eq 0 ]; then
-    echo "Интерактивные запросы отключены."
-  else
-    echo "Ошибка при отключении интерактивных запросов. Пропускаем..."
+  export NEEDRESTART_MODE=a
+  echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+}
+
+# Удаление needrestart (если не нужен)
+remove_needrestart() {
+  if dpkg -l | grep -q needrestart; then
+    echo "Удаление needrestart..."
+    sudo apt-get purge -y needrestart
   fi
 }
 
+# Очистка старых ядер и пакетов
+cleanup_kernels() {
+  echo "Очистка старых ядер и зависимостей..."
+  sudo apt-get autoremove --purge -y
+}
 remove_old_docker() {
   echo "Удаление старых версий Docker и связанных компонентов..."
   # Список пакетов для полного удаления
@@ -98,14 +90,17 @@ echo -e "\033[1;34m"
 echo
 echo -e "\033[1;32mTelegram community: \033[5;31mhttps://t.me/g7team_ru\033[0m"
 echo -e "\033[0m"
-echo "Обновление списка пакетов и установка обновлений..."
-sudo apt update -y && sudo apt upgrade -y
 
-# Отключение интерактивных запросов
-disable_interactive_prompts
+configure_environment
 
-# Настройка needrestart
-configure_needrestart
+echo "Обновление системы..."
+sudo apt-get update -yq
+sudo apt-get upgrade -yq
+
+echo "Установка критически важных пакетов..."
+sudo apt-get install -yq apt-utils dialog 2>/dev/null
+
+remove_needrestart
 
 # Установка необходимых пакетов
 echo "Установка необходимых пакетов..."

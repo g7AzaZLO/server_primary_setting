@@ -1,12 +1,17 @@
 #!/bin/bash
 
 configure_needrestart() {
-  echo "Настройка needrestart для автоматического перезапуска служб..."
-  sudo sed -i "s/\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
-  if [ $? -eq 0 ]; then
-    echo "needrestart настроен на автоматический перезапуск служб."
+  echo "Проверка наличия needrestart..."
+  if dpkg -l | grep -q needrestart; then
+    echo "Настройка needrestart для автоматического перезапуска служб..."
+    sudo sed -i "s/\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
+    if [ $? -eq 0 ]; then
+      echo "needrestart настроен на автоматический перезапуск служб."
+    else
+      echo "Ошибка при настройке needrestart. Пропускаем..."
+    fi
   else
-    echo "Ошибка при настройке needrestart. Пропускаем..."
+    echo "needrestart не установлен. Пропускаем настройку."
   fi
 }
 
